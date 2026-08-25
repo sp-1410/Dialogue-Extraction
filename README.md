@@ -1,4 +1,4 @@
-# Dialogue Locator
+# Dialogue Extraction
 
 Given a video and a target line of dialogue, find the exact frame where
 that line is first spoken: timestamp, frame number, recognized text, and
