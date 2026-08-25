@@ -1,0 +1,13 @@
+D:\Projects\quest\.venv\Lib\site-packages\whisper\transcribe.py:132: UserWarning: FP16 is not supported on CPU; using FP32 instead
+  warnings.warn("FP16 is not supported on CPU; using FP32 instead")
+Coarse pass: transcribing with Whisper (tiny)...
+Loading Whisper model 'tiny'...
+Fine pass: re-transcribing 13.0s window with Whisper (small)...
+Loading Whisper model 'small'...
+
+Target dialogue: My mind rebels at stagnation
+Recognized dialogue: My mind rebels at stagnation.
+Timestamp: 324.88 seconds (00:05:24.880)
+Frame number: 7789
+Frame image: result_frame.jpg
+Confidence: 100% (High)

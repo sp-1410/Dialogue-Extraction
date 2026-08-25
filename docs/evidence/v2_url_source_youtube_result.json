@@ -1,0 +1,34 @@
+{
+  "query": {
+    "video_source": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+    "target_dialogue": "really long trunks"
+  },
+  "result": {
+    "found": true,
+    "timestamp": 9.46,
+    "frame_number": 142,
+    "recognized_text": "really long trunks.",
+    "frame_image": "yt_frame.jpg",
+    "confidence": {
+      "score": 100.0,
+      "label": "High",
+      "signals": {
+        "match_score": 100.0,
+        "timing_consistency": 100.0,
+        "uniqueness_margin": 25.0,
+        "candidate_count": 1
+      }
+    },
+    "used_full_search": false
+  },
+  "candidates": [
+    {
+      "start": 9.46,
+      "end": 12.28,
+      "matched_text": "really long trunks.",
+      "match_score": 100.0,
+      "timing_consistency": 100.0,
+      "frame_number": 142
+    }
+  ]
+}

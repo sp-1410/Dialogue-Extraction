@@ -1,0 +1,42 @@
+{
+  "query": {
+    "video_source": "video.mp4",
+    "target_dialogue": "I can't breathe"
+  },
+  "result": {
+    "found": true,
+    "timestamp": 2518.2799999999997,
+    "frame_number": 60379,
+    "recognized_text": "I can't breathe.",
+    "frame_image": "result_frame.jpg",
+    "confidence": {
+      "score": 100.0,
+      "label": "High",
+      "signals": {
+        "match_score": 100.0,
+        "timing_consistency": 100.0,
+        "uniqueness_margin": 28.6,
+        "candidate_count": 2
+      }
+    },
+    "used_full_search": true
+  },
+  "candidates": [
+    {
+      "start": 2518.2799999999997,
+      "end": 2519.76,
+      "matched_text": "I can't breathe.",
+      "match_score": 100.0,
+      "timing_consistency": 100.0,
+      "frame_number": 60379
+    },
+    {
+      "start": 218.56,
+      "end": 219.1,
+      "matched_text": "I haven't eaten",
+      "match_score": 71.42857142857143,
+      "timing_consistency": 100.0,
+      "frame_number": 5240
+    }
+  ]
+}

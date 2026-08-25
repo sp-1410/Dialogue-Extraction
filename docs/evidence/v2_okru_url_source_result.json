@@ -1,0 +1,34 @@
+{
+  "query": {
+    "video_source": "https://ok.ru/video/248244667877",
+    "target_dialogue": "My mind rebels at stagnation"
+  },
+  "result": {
+    "found": true,
+    "timestamp": 324.88,
+    "frame_number": 7789,
+    "recognized_text": "My mind rebels at stagnation.",
+    "frame_image": "okru_frame.jpg",
+    "confidence": {
+      "score": 100.0,
+      "label": "High",
+      "signals": {
+        "match_score": 100.0,
+        "timing_consistency": 100.0,
+        "uniqueness_margin": 25.0,
+        "candidate_count": 1
+      }
+    },
+    "used_full_search": false
+  },
+  "candidates": [
+    {
+      "start": 324.88,
+      "end": 327.7,
+      "matched_text": "My mind rebels at stagnation.",
+      "match_score": 100.0,
+      "timing_consistency": 100.0,
+      "frame_number": 7789
+    }
+  ]
+}

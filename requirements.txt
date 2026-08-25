@@ -1,0 +1,7 @@
+# Pulled in transitively: torch, numpy. ffmpeg-python is NOT used --
+# ffmpeg is invoked as an external binary (must be on PATH).
+yt-dlp>=2026.8
+openai-whisper
+opencv-python
+certifi
+rapidfuzz

@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+workdir/
+cache/
+*.jpg
+*.png
+result.json
+.cache/
+.pytest_cache/
+*.wav
+*.mp4
+*.mkv
+*.webm
+!tests/fixtures/*.mp4
+!docs/evidence/*.jpg
+!docs/evidence/*.json

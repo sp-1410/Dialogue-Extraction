@@ -1,0 +1,8 @@
+                             Fine-pass cache hit - skipping window transcription.
+
+Target dialogue: My mind rebels at stagnation
+Recognized dialogue: My mind rebels at stagnation.
+Timestamp: 324.88 seconds (00:05:24.880)
+Frame number: 7789
+Frame image: okru_frame.jpg
+Confidence: 100% (High)

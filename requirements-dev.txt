@@ -1,0 +1,3 @@
+# Dev/test only -- not needed to run main.py itself.
+-r requirements.txt
+pytest

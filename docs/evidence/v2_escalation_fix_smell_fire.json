@@ -1,0 +1,34 @@
+{
+  "query": {
+    "video_source": "video.mp4",
+    "target_dialogue": "Madam I think I can smell fire"
+  },
+  "result": {
+    "found": true,
+    "timestamp": 2492.7,
+    "frame_number": 59765,
+    "recognized_text": "Madam, I think I can smell fire.",
+    "frame_image": "result_frame.jpg",
+    "confidence": {
+      "score": 100.0,
+      "label": "High",
+      "signals": {
+        "match_score": 100.0,
+        "timing_consistency": 100.0,
+        "uniqueness_margin": 25.0,
+        "candidate_count": 1
+      }
+    },
+    "used_full_search": true
+  },
+  "candidates": [
+    {
+      "start": 2492.7,
+      "end": 2495.32,
+      "matched_text": "Madam, I think I can smell fire.",
+      "match_score": 100.0,
+      "timing_consistency": 100.0,
+      "frame_number": 59765
+    }
+  ]
+}
