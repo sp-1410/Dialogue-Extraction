@@ -1,6 +1,6 @@
 # Video Dialogue Frame Extraction
 
-An AI-assisted video processing pipeline that identifies a specified dialogue in a video, determines its timestamp and frame number, extracts the corresponding video frame, and reports the recognized dialogue text with a confidence indicator.
+An video processing pipeline that identifies a specified dialogue in a video, determines its timestamp and frame number, extracts the corresponding video frame, and reports the recognized dialogue text with a confidence indicator.
 
 ## What the solution does
 
