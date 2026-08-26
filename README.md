@@ -1,116 +1,423 @@
-# Dialogue Extraction
+# Video Dialogue Frame Extraction
 
-Given a video and a target line of dialogue, find the exact frame where
-that line is first spoken: timestamp, frame number, recognized text, and
-the frame itself as an image.
+An AI-assisted video processing pipeline that identifies a specified dialogue in a video, determines its timestamp and frame number, extracts the corresponding video frame, and reports the recognized dialogue text with a confidence indicator.
 
-See [`approach.md`](approach.md) for how this solution evolved -- MVP
-through every roadmap improvement, including problems found during
-testing and why each design choice was made -- and
-[`prompts.md`](prompts.md) for the LLM-assisted decisions made along the
-way. The original brief and improvement roadmap this project follows are
-in [`quest1_solution_prompt.md`](quest1_solution_prompt.md).
+## What the solution does
 
-## Setup
+Given:
+- a local video file
+- a target dialogue
 
-```bash
+the pipeline:
+
+1. Searches the video for the target dialogue.
+2. Uses speech transcription to identify candidate dialogue segments.
+3. Uses a coarse-to-fine search strategy to reduce unnecessary transcription work.
+4. Matches the target against the recognized transcript.
+5. Resolves the most relevant timestamp for the dialogue.
+6. Extracts the corresponding video frame.
+7. Reports:
+   - timestamp
+   - frame number
+   - recognized dialogue
+   - extracted frame image
+   - confidence level when available
+
+## Example Result
+
+For the target dialogue:
+
+> `My mind rebels at stagnation`
+
+the final pipeline produced:
+
+- **Recognized dialogue:** `My mind rebels its stagnation.`
+- **Timestamp:** `324.42 seconds (00:05:24.420)`
+- **Frame number:** `7778`
+- **Frame image:** `result_frame.jpg`
+- **Confidence:** `100% (High)`
+
+The transcript wording is not forced to equal the input query; the pipeline reports the speech recognized by the transcription model.
+
+## Project Structure
+
+```text
+quest/
+├── main.py
+├── requirements.txt
+├── requirements-dev.txt
+├── tests/
+│   └── ...
+├── video.mp4                  # input video (not required in the repository)
+├── result_frame.jpg           # generated output frame
+├── prompts.md                 # prompts used during development
+├── APPROACH.md                # design and approach documentation
+├── README.md
+└── evidence/
+    ├── evidence_final_not_found.png
+    ├── evidence_final_success.png
+    ├── evidence_result_frame.png
+    ├── evidence_tests_passed.png
+    └── evidence_baseline.png
+```
+
+> **Note:** Keep the evidence screenshots in an `evidence/` folder in the GitHub repository. The screenshots below assume that folder structure.
+
+---
+
+# Setup and Installation
+
+## 1. Open the project folder
+
+```powershell
+cd C:\quest
+```
+
+Replace `C:\quest` with the location of the project on your machine.
+
+## 2. Create a Python virtual environment
+
+```powershell
 python -m venv .venv
-.venv/Scripts/activate        # Windows
-pip install -r requirements.txt
 ```
 
-`ffmpeg` must also be installed and on `PATH` (not a Python package):
+## 3. Activate the virtual environment
 
-```bash
-winget install --id Gyan.FFmpeg -e
+### Windows PowerShell
+
+```powershell
+.venv\Scripts\Activate.ps1
 ```
 
-## Run
+If PowerShell blocks script execution, use:
 
-```bash
-python main.py --source "https://ok.ru/video/248244667877" \
-                --dialogue "My mind rebels at stagnation"
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-`--source` (alias `--url`) accepts either a URL, downloaded via `yt-dlp`,
-or a local video file path. Prints the human-readable result and always
-writes a structured `result.json` alongside it (see `locator/schema.py`
-for the shape).
+Then activate again:
 
-By default, the search is **coarse-to-fine** (roadmap #7): a cheap `tiny`
-pass locates an approximate window, then only that window is re-transcribed
-at full fidelity with the `small` model -- falling back to a full
-fine-grained pass automatically if the coarse pass finds nothing close to
-the target. Transcripts are cached under `cache/`, so a repeat run against
-the same video is seconds, not minutes (see `approach.md` section 11 for
-measured numbers).
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
-<details>
-<summary>All flags</summary>
+You should see:
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--source` / `--url` | *(required)* | Video URL or local file path |
-| `--dialogue` | *(required)* | Target line to locate |
-| `--model` | `small` | Whisper model for the fine/full pass |
-| `--coarse-model` | `tiny` | Whisper model for the coarse pass |
-| `--coarse-to-fine` / `--no-coarse-to-fine` | on | Two-pass vs. full-file transcription |
-| `--window-pad` | `5.0` | Seconds padded around the coarse window |
-| `--floor` | `70.0` | Minimum RapidFuzz score to keep a candidate |
-| `--max-candidates` | `5` | Candidates shown in console/JSON output |
-| `--work-dir` | `workdir` | Downloaded video / extracted audio |
-| `--cache-dir` | `cache` | Transcript cache location |
-| `--no-cache` | off | Disable transcript caching |
-| `--out-image` | `result_frame.jpg` | Extracted frame output path |
-| `--out-json` | `result.json` | Structured result output path |
+```text
+(.venv) PS C:\quest>
+```
 
-</details>
+## 4. Upgrade pip
 
-## Tests
+```powershell
+python -m pip install --upgrade pip
+```
 
-```bash
-pip install -r requirements-dev.txt
+## 5. Install the project requirements
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+## 6. Install development/test requirements
+
+```powershell
+python -m pip install -r requirements-dev.txt
+```
+
+## 7. Install yt-dlp with Chrome impersonation support
+
+```powershell
+python -m pip install -U "yt-dlp[curl-cffi]"
+```
+
+## 8. Verify curl_cffi
+
+```powershell
+python -c "import curl_cffi; print(curl_cffi.__version__)"
+```
+
+A version number should be printed.
+
+---
+
+# Obtaining the Input Video
+
+The pipeline accepts a local video file.
+
+For example, if the video is named:
+
+```text
+video.mp4
+```
+
+place it in the project directory:
+
+```text
+C:\quest\video.mp4
+```
+
+## Downloading a video with yt-dlp
+
+For the provided OK.ru video, the command used during development was:
+
+```powershell
+python -m yt_dlp --impersonate chrome --retries 20 --fragment-retries 20 -f "best[ext=mp4]/best" "https://ok.ru/video/248244667877"
+```
+
+A resolution-limited version can also be used:
+
+```powershell
+python -m yt_dlp --impersonate chrome --retries 20 --fragment-retries 20 -f "best[height<=480][ext=mp4]/best[height<=480]/best" "https://ok.ru/video/248244667877"
+```
+
+## Choosing a resolution
+
+To inspect the formats available for a video:
+
+```powershell
+python -m yt_dlp -F "VIDEO_URL"
+```
+
+For example:
+
+```powershell
+python -m yt_dlp -F "https://ok.ru/video/248244667877"
+```
+
+This displays available resolutions and format IDs.
+
+For the tested video, available HLS resolutions included:
+
+```text
+192x144
+320x240
+480x360
+640x480
+960x720
+```
+
+If a specific maximum resolution is required, the format selector can be adjusted accordingly.
+
+For example, to select the best available MP4 at or below 480p:
+
+```powershell
+-f "best[height<=480][ext=mp4]/best[height<=480]/best"
+```
+
+The important point is that `-F` should be used first when you need to inspect what formats a particular video actually provides.
+
+---
+
+# Running the Pipeline
+
+## Basic command
+
+```powershell
+python main.py --source "video.mp4" --dialogue "My mind rebels at stagnation"
+```
+
+Replace:
+
+- `video.mp4` with your input video
+- `My mind rebels at stagnation` with the dialogue you want to find
+
+### Example
+
+```powershell
+python main.py --source "video.mp4" --dialogue "My mind rebels at stagnation"
+```
+
+A successful run reports information similar to:
+
+```text
+Target dialogue: My mind rebels at stagnation
+Recognized dialogue: My mind rebels at stagnation.
+Timestamp: 324.42 seconds (00:05:24.420)
+Frame number: 7778
+Frame image: result_frame.jpg
+Confidence: 100% (High)
+```
+
+The generated frame is written to the output location used by the implementation, for example:
+
+```text
+result_frame.jpg
+```
+
+---
+
+# Running the Tests
+
+Run the complete test suite with:
+
+```powershell
 pytest tests/ -v
 ```
 
-25 tests: fast unit tests for matching/ranking/frame-conversion logic
-(`test_match.py`, `test_confidence.py`, `test_frames.py`, no network or
-Whisper-model-size dependency) plus end-to-end smoke tests against a local
-synthetic fixture (`test_pipeline.py`). If `tests/fixtures/sample.mp4` is
-missing, regenerate it with (Windows, needs ffmpeg on `PATH`):
+The final implementation was tested with:
 
-```bash
-powershell -File tests/make_test_clip.ps1
+```text
+25 passed, 5 warnings in 19.17s
 ```
 
-## Status
+The warnings included the expected CPU Whisper warning:
 
-Roadmap items #1-#9 implemented and validated -- see `approach.md`
-section 10 for how each was built and tested, section 11 for the
-real-video validation run, section 12 for a real coarse-to-fine bug found
-during local testing (and fixed), and section 13 for validating the
-`--source <URL>` path for real against both the actual reference video
-and a generic `yt-dlp`-supported URL:
+```text
+FP16 is not supported on CPU; using FP32 instead
+```
 
-- **Real reference video, via URL** (`--source "https://ok.ru/video/248244667877"`):
-  downloads the actual reference video live (1,000,228,569 bytes,
-  confirmed byte-identical to the local copy), finds *"My mind rebels at
-  stagnation"* at **324.88s / frame 7789**, 100% confidence, single
-  unique candidate -- confirmed to be the genuine line from *The Sign of
-  Four*. First cold-cache run: **4m10s**, down from v1's ~18 minutes.
-  Repeat run (warm cache): **6.1s**.
-- **Real reference video, via local file** (`--source video.mp4`): same
-  result, same numbers -- useful as a network-independent fallback (see
-  `approach.md` section 7 for why that mattered during development).
-- **Generic URL path**, independently re-validated against a small
-  YouTube video end to end (download, transcribe, match, extract).
-- **Real bug found via local testing, now fixed**: dialogue later in the
-  video (*"Madam I think I can smell fire"*, *"I can't breathe"*) was
-  initially misreported as not found -- the coarse-to-fine search locked
-  onto the wrong window rather than finding nothing. Now escalates to a
-  full search automatically; both lines resolve correctly (`approach.md`
-  section 12).
-- **Synthetic fixture + unit tests**: 25/25 passing.
+This is a warning rather than a test failure.
 
-See `approach.md` section 14 for improvements that were considered and
-deliberately not implemented, with the reasoning for each.
+---
+
+# Evidence
+
+The following screenshots document the development and final validation of the solution.
+
+## 1. Final pipeline: successful dialogue identification
+
+This run demonstrates the final pipeline identifying the target dialogue and returning the timestamp, frame number, frame image, and confidence.
+
+![Final successful run](evidence/evidence_final_success.png)
+
+## 2. Extracted result frame
+
+The corresponding video frame extracted by the pipeline:
+
+![Extracted result frame](evidence/evidence_result_frame.png)
+
+## 3. Final test suite
+
+The final automated test run:
+
+```text
+25 passed, 5 warnings in 19.17s
+```
+
+![Test results](evidence/evidence_tests_passed.png)
+
+## 4. Handling a dialogue that is not found
+
+The final pipeline can also report when the requested dialogue is not found:
+
+```text
+Target dialogue: my name is sanjana
+Recognized dialogue: NOT FOUND
+Target dialogue was not found in the transcript.
+```
+
+![Dialogue not found](evidence/evidence_final_not_found.png)
+
+## 5. Baseline comparison
+
+An earlier baseline run is included for development comparison. It did not provide the final confidence reporting and produced a less accurate result.
+
+![Baseline run](evidence/evidence_baseline.png)
+
+The baseline screenshot is included as development evidence rather than as the final expected output.
+
+---
+
+# Development Notes
+
+## Video download issue
+
+During development, video downloading initially failed with a connection-reset error. Closing Chrome tabs changed the network/session conditions, after which the download worked successfully.
+
+The working yt-dlp command used Chrome impersonation and retry options:
+
+```powershell
+python -m yt_dlp --impersonate chrome --retries 20 --fragment-retries 20 -f "best[ext=mp4]/best" "https://ok.ru/video/248244667877"
+```
+
+This was useful for diagnosing the issue because the successful download showed that the installation and command configuration were valid; the earlier failure was related to the network/session conditions.
+
+## Whisper vs WhisperX
+
+WhisperX was considered during development because it can provide faster/optimized transcription workflows and alignment capabilities.
+
+The final implementation retained the existing Whisper-based approach because it was already producing good and sufficiently accurate results for the target task. Introducing WhisperX would add another dependency and implementation layer without being necessary for the current requirements.
+
+---
+
+# Reproducibility Checklist
+
+For a fresh machine, follow these commands in order:
+
+```powershell
+cd C:\quest
+
+python -m venv .venv
+
+.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
+
+python -m pip install -r requirements.txt
+
+python -m pip install -r requirements-dev.txt
+
+python -m pip install -U "yt-dlp[curl-cffi]"
+
+python -c "import curl_cffi; print(curl_cffi.__version__)"
+```
+
+Then place the input video in the project folder and run:
+
+```powershell
+python main.py --source "video.mp4" --dialogue "My mind rebels at stagnation"
+```
+
+Run the tests:
+
+```powershell
+pytest tests/ -v
+```
+
+---
+
+# Input and Output
+
+### Input
+
+```text
+Video file + target dialogue
+```
+
+Example:
+
+```powershell
+python main.py --source "video.mp4" --dialogue "My mind rebels at stagnation"
+```
+
+### Output
+
+The solution identifies and reports:
+
+```text
+Timestamp
+Frame number
+Recognized dialogue
+Frame image
+Confidence
+```
+
+If the dialogue cannot be reliably located, the system reports:
+
+```text
+NOT FOUND
+```
+
+rather than returning an arbitrary frame.
+
+---
+
+# Documentation
+
+Additional project documentation:
+
+- `APPROACH.md` — design, processing pipeline, search strategy, frame selection, transcription, and uncertainty handling.
+- `prompts.md` — prompts used with AI/LLM tools during solution development.
+
+These documents are intended to make the implementation reproducible and explainable during evaluation.
