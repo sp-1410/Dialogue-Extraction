@@ -501,7 +501,7 @@ I want the document to show:
 - how I tested the final system
 - the final performance/results
 
-Please do not make it sound like a generic AI-generated technical article. Keep it in the style of a project development document written by me.
+Keep it in the style of a project development document.
 
 ---
 
