@@ -21,9 +21,8 @@ The dialogue I need to identify is:
 
 "My mind rebels at stagnation"
 
-Help me understand the possible ways to solve this problem. I initially thought OCR might be useful because the requirement involves identifying dialogue text, but I am not sure whether the dialogue is actually displayed on screen.
+Help me understand the possible ways to solve this problem. I initially thought OCR might be useful because the requirement involves identifying dialogue text, but I am not sure whether the dialogue is actually displayed on screen. I feel speech-text analysis can be the reliable way to approach this.
 
-Suggest practical approaches I can implement in Python and explain the trade-offs.
 
 ---
 
@@ -525,7 +524,7 @@ Point out:
 
 ## Prompt 30 — Final README / Project Presentation
 
-Now that the implementation is complete, help me structure the README so that someone evaluating the repository can understand it quickly.
+Now that the code implementation is complete, help me structure the README so that the its easy for someone to look and understand my work. I have attached a document containing my research as well as the steps i followed and documented. I have also pasted some screenshots as evidences and also the commands to run the code.Take a look at and structure it in the following way.
 
 It should explain:
 
