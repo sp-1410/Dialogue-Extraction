@@ -3,8 +3,6 @@
 This document contains the main prompts/questions I used while developing the Dialogue Timeline solution. I started with a simple baseline, tested it on the reference video, identified issues from the actual results, and then used those observations to decide what to improve.
 
 ---
-## Prompt 0- Collection of Prompts
-I need a collective list of prompts, that i have used in this chat, so i can collect the prompts in the order of how i initially approached the solution, the analysis and finally the solution arrived.
 
 ## Prompt 1 — Understanding the Problem
 
@@ -543,5 +541,8 @@ It should explain:
 - example output
 
 Keep it practical and focused on running/evaluating the project.
+
+## Prompt 31- Collection of Prompts
+I need a collective list of prompts, that i have used in this chat, so i can collect the prompts in the order of how i initially approached the solution, the analysis and finally the solution arrived.
 
 
